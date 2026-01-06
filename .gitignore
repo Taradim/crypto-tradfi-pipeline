@@ -69,6 +69,10 @@ target/
 # VS Code
 .vscode/
 *.code-workspace
+.cursorrules
+
+# Cursor IDE
+.cursor/
 
 # Spyder
 .spyproject/
@@ -97,3 +101,6 @@ app/alembic/versions/*
 playground/*.png
 
 app/google-service-account.json
+
+# Secrets dlt
+.dlt/

@@ -92,3 +92,15 @@
 {"ts": "2025-12-19T14:45:59.635683+00:00", "event": "rows_to_insert", "rows": 100, "run_id": "3c406471-a40c-4dde-937f-e2303aab2cd2"}
 {"ts": "2025-12-19T14:45:59.652292+00:00", "event": "db_insert_complete", "rows": 100, "run_id": "3c406471-a40c-4dde-937f-e2303aab2cd2"}
 {"ts": "2025-12-19T14:45:59.652437+00:00", "event": "job_end", "status": "ok", "duration_s": 0.339, "run_id": "3c406471-a40c-4dde-937f-e2303aab2cd2"}
+{"ts": "2025-12-23T11:34:09.395793+00:00", "event": "job_start", "run_id": "95a17157-cc7b-4d9e-8c6e-e802979f1296"}
+{"ts": "2025-12-23T11:34:09.659681+00:00", "event": "api_fetch_complete", "rows": 100, "run_id": "95a17157-cc7b-4d9e-8c6e-e802979f1296"}
+{"ts": "2025-12-23T11:34:09.913393+00:00", "event": "db_cutoff_max_last_updated", "cutoff": "2025-12-19 14:44:59.506000+00:00", "run_id": "95a17157-cc7b-4d9e-8c6e-e802979f1296"}
+{"ts": "2025-12-23T11:34:09.914093+00:00", "event": "rows_to_insert", "rows": 100, "run_id": "95a17157-cc7b-4d9e-8c6e-e802979f1296"}
+{"ts": "2025-12-23T11:34:09.939317+00:00", "event": "db_insert_complete", "rows": 100, "run_id": "95a17157-cc7b-4d9e-8c6e-e802979f1296"}
+{"ts": "2025-12-23T11:34:09.939513+00:00", "event": "job_end", "status": "ok", "duration_s": 0.544, "run_id": "95a17157-cc7b-4d9e-8c6e-e802979f1296"}
+{"ts": "2025-12-23T11:34:47.017047+00:00", "event": "job_start", "run_id": "61111522-10eb-405e-8850-babe9108a22e"}
+{"ts": "2025-12-23T11:34:47.212627+00:00", "event": "api_fetch_complete", "rows": 100, "run_id": "61111522-10eb-405e-8850-babe9108a22e"}
+{"ts": "2025-12-23T11:34:47.338138+00:00", "event": "db_cutoff_max_last_updated", "cutoff": "2025-12-23 11:33:12.211000+00:00", "run_id": "61111522-10eb-405e-8850-babe9108a22e"}
+{"ts": "2025-12-23T11:34:47.338847+00:00", "event": "rows_to_insert", "rows": 97, "run_id": "61111522-10eb-405e-8850-babe9108a22e"}
+{"ts": "2025-12-23T11:34:47.358209+00:00", "event": "db_insert_complete", "rows": 97, "run_id": "61111522-10eb-405e-8850-babe9108a22e"}
+{"ts": "2025-12-23T11:34:47.358353+00:00", "event": "job_end", "status": "ok", "duration_s": 0.341, "run_id": "61111522-10eb-405e-8850-babe9108a22e"}

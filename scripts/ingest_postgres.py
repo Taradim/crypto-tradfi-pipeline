@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import os
-from dataclasses import dataclass
-from typing import Any
-import uuid
-
 import json
+import os
 import time
+import uuid
+from dataclasses import dataclass
 from datetime import datetime, timezone
+from typing import Any
 
 import pandas as pd
 import requests
@@ -20,6 +19,7 @@ COINGECKO_URL = (
     "https://api.coingecko.com/api/v3/coins/markets"
     "?vs_currency=usd&order=market_cap_desc&per_page=100&page=1"
 )
+
 
 def log_event(event: str, **fields: object) -> None:
     payload = {
@@ -34,13 +34,14 @@ def log_event(event: str, **fields: object) -> None:
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(line + "\n")
 
+
 @dataclass
 class Settings:
     pg_user: str
     pg_password: str
     pg_db: str
     pg_host: str
-    pg_port: int 
+    pg_port: int
 
 
 def load_settings() -> Settings:
@@ -79,7 +80,8 @@ def to_dataframe(rows: list[dict[str, Any]]) -> pd.DataFrame:
     if missing:
         raise KeyError(f"Missing expected columns from API response: {missing}")
 
-    df = df[cols].copy()
+    # Use .loc to ensure DataFrame type (not Series)
+    df = df.loc[:, cols].copy()
 
     # Parse ISO-8601 timestamps -> timezone-aware UTC
     df["last_updated"] = pd.to_datetime(df["last_updated"], utc=True, errors="raise")
@@ -101,7 +103,6 @@ def main() -> None:
     run_id = str(uuid.uuid4())
     log_event("job_start", run_id=run_id)
 
-
     settings = load_settings()
     coins_markets = fetch_coins_markets()
     df = to_dataframe(coins_markets)
@@ -111,7 +112,9 @@ def main() -> None:
         f"postgresql+psycopg2://{settings.pg_user}:{settings.pg_password}@{settings.pg_host}:{settings.pg_port}/{settings.pg_db}"
     )
 
-    max_ts = pd.read_sql("SELECT MAX(last_updated) AS max_last_updated FROM crypto_market", con=engine)
+    max_ts = pd.read_sql(
+        "SELECT MAX(last_updated) AS max_last_updated FROM crypto_market", con=engine
+    )
     cutoff = max_ts.loc[0, "max_last_updated"]
     log_event("db_cutoff_max_last_updated", cutoff=cutoff, run_id=run_id)
 
@@ -123,7 +126,12 @@ def main() -> None:
     log_event("rows_to_insert", rows=len(df), run_id=run_id)
 
     if df.empty:
-        log_event("job_end", status="no_op", duration_s=round(time.time() - t0, 3), run_id=run_id)
+        log_event(
+            "job_end",
+            status="no_op",
+            duration_s=round(time.time() - t0, 3),
+            run_id=run_id,
+        )
         return
 
     df.to_sql(
@@ -131,7 +139,10 @@ def main() -> None:
     )
     log_event("db_insert_complete", rows=len(df), run_id=run_id)
 
-    log_event("job_end", status="ok", duration_s=round(time.time() - t0, 3), run_id=run_id)
+    log_event(
+        "job_end", status="ok", duration_s=round(time.time() - t0, 3), run_id=run_id
+    )
+
 
 if __name__ == "__main__":
     main()
