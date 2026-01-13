@@ -1,4 +1,4 @@
-.PHONY: test test-unit test-integration test-cov install-dev clean
+.PHONY: test test-unit test-integration test-cov install-dev clean setup-env
 
 # Install development dependencies
 install-dev:
@@ -28,3 +28,23 @@ clean:
 	rm -rf __pycache__
 	find . -type d -name __pycache__ -exec rm -r {} +
 	find . -type f -name "*.pyc" -delete
+
+# Airflow: Configure AIRFLOW_UID in .env.airflow and create .env symlink
+setup-env:
+	@if [ ! -f .env.airflow ]; then \
+		echo "Error: .env.airflow not found. Please create it from env.airflow.example"; \
+		exit 1; \
+	fi
+	@if grep -q "^AIRFLOW_UID=" .env.airflow; then \
+		sed -i "s/^AIRFLOW_UID=.*/AIRFLOW_UID=$$(id -u)/" .env.airflow; \
+		echo "Updated AIRFLOW_UID to $$(id -u) in .env.airflow"; \
+	else \
+		echo "AIRFLOW_UID=$$(id -u)" >> .env.airflow; \
+		echo "Added AIRFLOW_UID=$$(id -u) to .env.airflow"; \
+	fi
+	@if [ -f .env ]; then \
+		echo ".env already exists, skipping symlink creation"; \
+	else \
+		ln -s .env.airflow .env; \
+		echo "Created .env symlink from .env.airflow"; \
+	fi
