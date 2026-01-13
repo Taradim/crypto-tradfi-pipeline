@@ -55,11 +55,7 @@ def setup_logging(
         structlog.dev.ConsoleRenderer(colors=True),
     ]
 
-    # File renderer (JSON)
-    file_processors: list[Processor] = [
-        *shared_processors,
-        structlog.processors.JSONRenderer(),
-    ]
+    # File renderer (JSON) - processors are used in file_formatter below
 
     # Configure standard library logging
     logging.basicConfig(

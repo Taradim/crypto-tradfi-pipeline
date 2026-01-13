@@ -1,6 +1,6 @@
 """Shared pytest fixtures for integration tests."""
 
-from typing import Generator
+from collections.abc import Generator
 
 import boto3
 import pytest

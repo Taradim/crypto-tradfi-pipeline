@@ -15,9 +15,7 @@ class TestPipelineE2E:
     """Test complete pipeline execution end-to-end."""
 
     @patch("src.pipelines.coingecko.requests.Session")
-    def test_pipeline_e2e_with_mocked_api(
-        self, mock_session_class, mock_s3_bucket, mock_s3_client
-    ):
+    def test_pipeline_e2e_with_mocked_api(self, mock_session_class, mock_s3_bucket, mock_s3_client):
         """Test complete pipeline with mocked API and real S3 operations."""
         # Setup mocked API response
         mock_session = type("Session", (), {})()
@@ -26,7 +24,9 @@ class TestPipelineE2E:
         mock_response.json = lambda: mock_coingecko_response()[:5]  # 5 records
         mock_response.raise_for_status = lambda: None
 
-        mock_get = lambda *args, **kwargs: mock_response
+        def mock_get(*args, **kwargs):
+            return mock_response
+
         mock_session.get = mock_get
         mock_session.headers = {}
         mock_session.mount = lambda *args: None
@@ -48,9 +48,7 @@ class TestPipelineE2E:
         assert file_response["ContentType"] == "application/parquet"
 
     @patch("src.pipelines.coingecko.requests.Session")
-    def test_pipeline_e2e_multiple_pages(
-        self, mock_session_class, mock_s3_bucket, mock_s3_client
-    ):
+    def test_pipeline_e2e_multiple_pages(self, mock_session_class, mock_s3_bucket, mock_s3_client):
         """Test pipeline with multiple pages."""
         # Setup mocked API response
         mock_session = type("Session", (), {})()
@@ -59,7 +57,9 @@ class TestPipelineE2E:
         mock_response.json = lambda: mock_coingecko_response()[:3]  # 3 records per page
         mock_response.raise_for_status = lambda: None
 
-        mock_get = lambda *args, **kwargs: mock_response
+        def mock_get(*args, **kwargs):
+            return mock_response
+
         mock_session.get = mock_get
         mock_session.headers = {}
         mock_session.mount = lambda *args: None
@@ -68,7 +68,7 @@ class TestPipelineE2E:
 
         # Execute pipeline with 2 pages
         pipeline = CoinGeckoPipeline(bucket_name=mock_s3_bucket, num_pages=2)
-        s3_path = pipeline.run()
+        pipeline.run()
 
         # Verify file exists
         response = mock_s3_client.list_objects_v2(Bucket=mock_s3_bucket)

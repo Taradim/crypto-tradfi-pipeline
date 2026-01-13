@@ -14,7 +14,7 @@ import requests
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.monitoring import get_logger, setup_logging
+from src.monitoring import get_logger, setup_logging  # noqa: E402
 
 # Setup structured logging (same as the rest of the project)
 setup_logging()

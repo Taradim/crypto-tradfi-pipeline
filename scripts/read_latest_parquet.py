@@ -12,11 +12,11 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-import boto3
-import pandas as pd
+import boto3  # noqa: E402
+import pandas as pd  # noqa: E402
 
-from src.config import Config
-from src.monitoring import get_logger, setup_logging
+from src.config import Config  # noqa: E402
+from src.monitoring import get_logger, setup_logging  # noqa: E402
 
 # Setup logging
 setup_logging()

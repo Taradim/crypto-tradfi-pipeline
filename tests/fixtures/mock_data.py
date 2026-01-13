@@ -43,6 +43,20 @@ def mock_coingecko_response() -> list[dict[str, Any]]:
                 "total_supply": 19500000.0,
                 "last_updated": "2026-01-12T18:00:00.000Z",
             },
+            {
+                "id": "ethereum",
+                "symbol": "eth",
+                "name": "Ethereum",
+                "current_price": 3000.0,
+                "market_cap": 360000000000,
+                "market_cap_rank": 2,
+                "total_volume": 15000000000,
+                "high_24h": 3100.0,
+                "low_24h": 2900.0,
+                "circulating_supply": 120000000.0,
+                "total_supply": 120000000.0,
+                "last_updated": "2026-01-12T18:00:00.000Z",
+            },
         ]
 
 
