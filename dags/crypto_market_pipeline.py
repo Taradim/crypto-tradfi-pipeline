@@ -76,7 +76,7 @@ dag = DAG(
     "crypto_market_pipeline",
     default_args=default_args,
     description="Orchestrates CoinGecko cryptocurrency market data ingestion",
-    schedule="0 2 * * *",  # Daily at 2:00 UTC
+    schedule="0 */6 * * *",  # Every 6 hours (UTC)
     catchup=False,
     tags=["crypto", "coingecko", "data-ingestion"],
 )
