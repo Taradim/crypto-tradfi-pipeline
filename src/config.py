@@ -10,8 +10,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .env or .env.airflow file
+# Try .env.airflow first (for Docker/Airflow), then fallback to .env
+load_dotenv(".env.airflow")  # Try .env.airflow first
+load_dotenv(".env")  # Fallback to .env if .env.airflow doesn't exist
 
 
 class Config:

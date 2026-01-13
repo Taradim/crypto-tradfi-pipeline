@@ -1,3 +1,9 @@
 aws_region  = "eu-west-1"
-bucket_name = "votre-nom-de-bucket-unique-2025"
+bucket_name = "your-unique-bucket-name-2025"
+
+# IAM User Configuration
+# Set to false if you want to use your existing AWS credentials from .env
+create_iam_user = true
+# Optional: customize the IAM user name (defaults to {bucket_name}-exec-user)
+# iam_user_name = "my-exec-user"
 

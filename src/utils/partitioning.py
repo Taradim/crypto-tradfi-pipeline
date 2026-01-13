@@ -62,9 +62,7 @@ def parse_s3_path(s3_path: str) -> dict[str, str]:
     parts = s3_path.strip("/").split("/")
 
     if len(parts) < 4:
-        raise ValueError(
-            f"Invalid S3 path format: {s3_path}. Expected: layer/source/date/filename"
-        )
+        raise ValueError(f"Invalid S3 path format: {s3_path}. Expected: layer/source/date/filename")
 
     layer = parts[0]
     source = parts[1]

@@ -40,9 +40,7 @@ class TestCoinGeckoPipelineExtract:
         """Test extract() when API returns an error."""
         mock_session = MagicMock()
         mock_response = MagicMock()
-        mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
-            "404 Not Found"
-        )
+        mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError("404 Not Found")
         mock_session.get.return_value = mock_response
         mock_session_class.return_value = mock_session
 

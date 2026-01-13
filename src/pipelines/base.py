@@ -88,9 +88,7 @@ class BasePipeline(ABC):
         """
         pass
 
-    def transform(
-        self, data: pd.DataFrame | dict[str, Any] | list[dict[str, Any]]
-    ) -> pd.DataFrame:
+    def transform(self, data: pd.DataFrame | dict[str, Any] | list[dict[str, Any]]) -> pd.DataFrame:
         """Transform raw data into a pandas DataFrame.
 
         Converts various input formats (dict, list of dicts, or DataFrame)

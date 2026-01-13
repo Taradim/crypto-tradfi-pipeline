@@ -13,3 +13,15 @@ variable "bucket_name" {
   }
 }
 
+variable "create_iam_user" {
+  description = "Whether to create an IAM user with S3 access for the host/server running Airflow DAGs"
+  type        = bool
+  default     = true
+}
+
+variable "iam_user_name" {
+  description = "Name of the IAM user to create (defaults to {bucket_name}-exec-user)"
+  type        = string
+  default     = ""
+}
+

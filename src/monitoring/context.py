@@ -3,7 +3,6 @@
 Provides context binding for pipeline tracking (pipeline_id, source, etc.).
 """
 
-
 from contextlib import contextmanager
 from typing import Any
 

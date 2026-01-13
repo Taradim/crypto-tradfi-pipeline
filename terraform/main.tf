@@ -61,6 +61,51 @@ resource "aws_s3_bucket_ownership_controls" "data_lake_ownership" {
   }
 }
 
+# IAM User for host/server running Airflow DAGs (optional)
+resource "aws_iam_user" "exec_user" {
+  count = var.create_iam_user ? 1 : 0
+  name  = var.iam_user_name != "" ? var.iam_user_name : "${var.bucket_name}-exec-user"
+
+  tags = {
+    Name        = "Airflow Host S3 Access"
+    Environment = "production"
+    Project     = "crypto-tradfi-pipeline"
+  }
+}
+
+# IAM Access Key for the user
+resource "aws_iam_access_key" "exec_user_key" {
+  count = var.create_iam_user ? 1 : 0
+  user  = aws_iam_user.exec_user[0].name
+}
+
+# IAM Policy for S3 access (limited to this specific bucket)
+resource "aws_iam_user_policy" "exec_s3_access" {
+  count  = var.create_iam_user ? 1 : 0
+  name   = "${var.bucket_name}-s3-access"
+  user   = aws_iam_user.exec_user[0].name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.data_lake.arn,
+          "${aws_s3_bucket.data_lake.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+
+
 # Outputs
 output "bucket_name" {
   description = "Name of the created S3 bucket"
@@ -75,5 +120,23 @@ output "bucket_arn" {
 output "bucket_region" {
   description = "Region of the created S3 bucket"
   value       = aws_s3_bucket.data_lake.region
+}
+
+output "iam_user_name" {
+  description = "Name of the IAM user created for host/server access"
+  value       = var.create_iam_user ? aws_iam_user.exec_user[0].name : null
+  sensitive   = false
+}
+
+output "iam_access_key_id" {
+  description = "Access Key ID for the IAM user (add this to .env.airflow)"
+  value       = var.create_iam_user ? aws_iam_access_key.exec_user_key[0].id : null
+  sensitive   = true
+}
+
+output "iam_secret_access_key" {
+  description = "Secret Access Key for the IAM user (add this to .env.airflow - SAVE THIS SECURELY, it won't be shown again!)"
+  value       = var.create_iam_user ? aws_iam_access_key.exec_user_key[0].secret : null
+  sensitive   = true
 }
 

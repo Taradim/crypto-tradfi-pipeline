@@ -41,9 +41,7 @@ def find_latest_parquet_file() -> str | None:
         return None
 
     # Filter parquet files and sort by last modified
-    parquet_files = [
-        obj for obj in response["Contents"] if obj["Key"].endswith(".parquet")
-    ]
+    parquet_files = [obj for obj in response["Contents"] if obj["Key"].endswith(".parquet")]
 
     if not parquet_files:
         logger.warning("no_parquet_files_found", bucket=bucket_name, prefix=prefix)

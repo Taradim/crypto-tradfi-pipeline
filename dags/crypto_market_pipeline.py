@@ -51,9 +51,7 @@ def run_coingecko_pipeline_task(**context: dict) -> str:
     setup_logging()
 
     # Get num_pages from Airflow variables or use default
-    num_pages = (
-        context.get("dag_run").conf.get("num_pages", 2) if context.get("dag_run") else 2
-    )
+    num_pages = context.get("dag_run").conf.get("num_pages", 2) if context.get("dag_run") else 2
 
     # Create and execute pipeline
     pipeline = CoinGeckoPipeline(num_pages=num_pages)
