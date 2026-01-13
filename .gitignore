@@ -29,6 +29,10 @@ var/
 *.manifest
 *.spec
 
+# Legacy
+legacy/
+.legacy/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -58,6 +62,7 @@ target/
 
 # DotEnv configuration
 .env
+.env.airflow
 
 # Database
 *.db
@@ -104,3 +109,19 @@ app/google-service-account.json
 
 # Secrets dlt
 .dlt/
+
+# Logs
+logs/*.log
+!logs/.gitkeep
+
+# Test fixtures (can be regenerated)
+tests/fixtures/*.json
+!tests/fixtures/coingecko_response.json.example
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfvars
+!terraform/*.tfvars.example

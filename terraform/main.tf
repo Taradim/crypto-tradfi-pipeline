@@ -52,6 +52,15 @@ resource "aws_s3_bucket_public_access_block" "data_lake_private" {
   restrict_public_buckets = true
 }
 
+# Object ownership controls (disables ACLs - best practice)
+resource "aws_s3_bucket_ownership_controls" "data_lake_ownership" {
+  bucket = aws_s3_bucket.data_lake.id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
 # Outputs
 output "bucket_name" {
   description = "Name of the created S3 bucket"
