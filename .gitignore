@@ -111,8 +111,9 @@ app/google-service-account.json
 .dlt/
 
 # Logs
-logs/*.log
+logs/
 !logs/.gitkeep
+*.log
 
 # Test fixtures (can be regenerated)
 tests/fixtures/*.json
