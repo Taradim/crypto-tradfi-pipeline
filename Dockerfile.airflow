@@ -23,14 +23,7 @@ COPY --chown=airflow:root pyproject.toml ./
 # Extract dependencies from pyproject.toml using tomllib (built-in in Python 3.11+)
 # and install them. This keeps pyproject.toml as the single source of truth.
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    python3 -c " \
-    import tomllib; \
-    with open('pyproject.toml', 'rb') as f: \
-    data = tomllib.load(f); \
-    deps = data['project']['dependencies']; \
-    with open('/tmp/requirements.txt', 'w') as req_file: \
-    req_file.write('\n'.join(deps)) \
-    " && \
+    python3 -c "import tomllib; f = open('pyproject.toml', 'rb'); data = tomllib.load(f); f.close(); deps = data['project']['dependencies']; req_file = open('/tmp/requirements.txt', 'w'); req_file.write('\n'.join(deps)); req_file.close()" && \
     pip install --no-cache-dir -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
 
