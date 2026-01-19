@@ -13,22 +13,17 @@ RUN apt-get update && apt-get install -y \
 # Switch to airflow user (required by Airflow image)
 USER airflow
 
-# Install uv (fast Python package installer written in Rust)
-# uv is much faster than pip and perfect for containers
-# Using pip as airflow user (Airflow image doesn't allow pip as root)
-RUN pip install --no-cache-dir uv
-
-# Install Python dependencies from pyproject.toml using uv
+# Install Python dependencies from pyproject.toml
 # Note: We don't install the project itself because:
 # 1. The code is mounted via volumes in docker-compose.yml
 # 2. setuptools would complain about multiple top-level packages (dags, logs, src)
 # Instead, we extract and install only the runtime dependencies from pyproject.toml
 # This ensures a single source of truth for dependencies (no duplication)
-# uv can read pyproject.toml directly and is 10-100x faster than pip
+# Using pip (not uv) because Airflow image has permission issues with uv --system
 COPY --chown=airflow:root pyproject.toml ./
-# Extract dependencies from pyproject.toml and install with uv
+# Extract dependencies from pyproject.toml and install with pip
 RUN python3 -c "import tomllib; f = open('pyproject.toml', 'rb'); data = tomllib.load(f); f.close(); deps = data['project']['dependencies']; req_file = open('/tmp/requirements.txt', 'w'); req_file.write('\n'.join(deps)); req_file.close()" && \
-    uv pip install --system -r /tmp/requirements.txt && \
+    pip install --no-cache-dir -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
 
 # Set working directory
