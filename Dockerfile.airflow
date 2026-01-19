@@ -10,21 +10,24 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Install uv (fast Python package installer written in Rust)
+# uv is much faster than pip and perfect for containers
+RUN pip install --no-cache-dir uv
+
 # Switch back to airflow user
 USER airflow
 
-# Install Python dependencies from pyproject.toml
+# Install Python dependencies from pyproject.toml using uv
 # Note: We don't install the project itself because:
 # 1. The code is mounted via volumes in docker-compose.yml
 # 2. setuptools would complain about multiple top-level packages (dags, logs, src)
 # Instead, we extract and install only the runtime dependencies from pyproject.toml
 # This ensures a single source of truth for dependencies (no duplication)
+# uv can read pyproject.toml directly and is 10-100x faster than pip
 COPY --chown=airflow:root pyproject.toml ./
-# Extract dependencies from pyproject.toml using tomllib (built-in in Python 3.11+)
-# and install them. This keeps pyproject.toml as the single source of truth.
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    python3 -c "import tomllib; f = open('pyproject.toml', 'rb'); data = tomllib.load(f); f.close(); deps = data['project']['dependencies']; req_file = open('/tmp/requirements.txt', 'w'); req_file.write('\n'.join(deps)); req_file.close()" && \
-    pip install --no-cache-dir -r /tmp/requirements.txt && \
+# Extract dependencies from pyproject.toml and install with uv
+RUN python3 -c "import tomllib; f = open('pyproject.toml', 'rb'); data = tomllib.load(f); f.close(); deps = data['project']['dependencies']; req_file = open('/tmp/requirements.txt', 'w'); req_file.write('\n'.join(deps)); req_file.close()" && \
+    uv pip install --system -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
 
 # Set working directory
