@@ -10,12 +10,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Switch to airflow user (required by Airflow image)
+USER airflow
+
 # Install uv (fast Python package installer written in Rust)
 # uv is much faster than pip and perfect for containers
+# Using pip as airflow user (Airflow image doesn't allow pip as root)
 RUN pip install --no-cache-dir uv
-
-# Switch back to airflow user
-USER airflow
 
 # Install Python dependencies from pyproject.toml using uv
 # Note: We don't install the project itself because:
