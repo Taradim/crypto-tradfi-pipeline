@@ -12,6 +12,7 @@ import pandas as pd
 # Path to fixtures directory
 FIXTURES_DIR = Path(__file__).parent
 COINGECKO_RESPONSE_FILE = FIXTURES_DIR / "coingecko_response.json"
+DEFILLAMA_RESPONSE_FILE = FIXTURES_DIR / "defillama_response.json"
 
 
 def mock_coingecko_response() -> list[dict[str, Any]]:
@@ -56,6 +57,35 @@ def mock_coingecko_response() -> list[dict[str, Any]]:
                 "circulating_supply": 120000000.0,
                 "total_supply": 120000000.0,
                 "last_updated": "2026-01-12T18:00:00.000Z",
+            },
+        ]
+
+
+def mock_defillama_response() -> list[dict[str, Any]]:
+    """Load DeFiLlama API response from saved JSON file.
+
+    If the file doesn't exist, returns a minimal fallback dataset.
+    To generate the file, run: uv run python -c "from src.pipelines.defillama import DeFiLlamaPipeline; import json; pipeline = DeFiLlamaPipeline(endpoint='protocols'); data = pipeline.extract(); sample = data[:5]; print(json.dumps(sample, indent=2))" > tests/fixtures/defillama_response.json
+
+    Returns:
+        List of dictionaries representing DeFi protocol data.
+    """
+    if DEFILLAMA_RESPONSE_FILE.exists():
+        with open(DEFILLAMA_RESPONSE_FILE) as f:
+            return json.load(f)
+    else:
+        # Fallback minimal data if file doesn't exist
+        return [
+            {
+                "id": "1",
+                "name": "Test Protocol",
+                "slug": "test-protocol",
+                "tvl": 1000000.0,
+                "chain": "Ethereum",
+                "symbol": "TEST",
+                "category": "DEX",
+                "change_1d": 1.5,
+                "change_7d": -2.3,
             },
         ]
 

@@ -18,6 +18,7 @@ dependencies = [
     "requests>=2.32.5",
     "sqlalchemy>=2.0.45",
     "structlog>=24.1.0",
+    "yfinance>=0.2.0",
 ]
 
 [project.optional-dependencies]

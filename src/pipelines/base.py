@@ -7,6 +7,7 @@ from various sources into S3 following the medallion architecture.
 from __future__ import annotations
 
 import io
+import json
 import time
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
@@ -14,6 +15,8 @@ from typing import Any
 
 import boto3
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 from botocore.exceptions import ClientError
 
 from src.config import Config
@@ -155,7 +158,34 @@ class BasePipeline(ABC):
         # Convert DataFrame to bytes based on format
         if format == "parquet":
             buffer = io.BytesIO()
-            data.to_parquet(buffer, index=False, engine="pyarrow")
+            # Try to convert with PyArrow, but fallback to JSON for problematic columns
+            try:
+                table = pa.Table.from_pandas(data, preserve_index=False)
+                pq.write_table(table, buffer)
+            except (pa.ArrowInvalid, pa.ArrowNotImplementedError, pa.ArrowTypeError) as e:
+                # If conversion fails due to complex/mixed types, convert problematic columns to JSON
+                self.logger.debug(
+                    "parquet_conversion_fallback",
+                    error=str(e),
+                    message="Converting complex types to JSON strings for Parquet compatibility",
+                )
+                # Convert complex types to JSON strings
+                data_copy = data.copy()
+                for col in data_copy.columns:
+                    if data_copy[col].dtype == "object":
+                        sample = data_copy[col].dropna()
+                        if len(sample) > 0:
+                            first_val = sample.iloc[0]
+                            if isinstance(first_val, (dict, list)):
+                                # Convert entire column to JSON strings
+                                data_copy[col] = data_copy[col].apply(
+                                    lambda x: json.dumps(x, default=str)
+                                    if isinstance(x, (dict, list))
+                                    else x
+                                )
+                # Retry conversion
+                table = pa.Table.from_pandas(data_copy, preserve_index=False)
+                pq.write_table(table, buffer)
             body = buffer.getvalue()
             content_type = "application/parquet"
         elif format == "json":

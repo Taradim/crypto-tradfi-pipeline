@@ -106,3 +106,67 @@ class TestS3Integration:
         keys = [obj["Key"] for obj in response["Contents"]]
         assert path1 in keys
         assert path2 in keys
+
+    def test_s3_parquet_preserves_complex_types(self, mock_s3_bucket, mock_s3_client):
+        """Test that Parquet files handle complex types (lists, dicts).
+
+        When PyArrow can handle them natively, they're preserved.
+        Otherwise, they're converted to JSON strings for compatibility.
+        """
+        import json
+
+        import pyarrow.parquet as pq
+
+        # Create DataFrame with complex nested structures
+        data = [
+            {
+                "id": "1",
+                "name": "Test Protocol",
+                "chains": ["Ethereum", "Arbitrum", "Base"],  # List
+                "chainTvls": {  # Dict
+                    "Ethereum": 1000000.0,
+                    "Arbitrum": 500000.0,
+                },
+                "hallmarks": [  # List of lists
+                    [1650471689, "Event 1"],
+                    [1659630089, "Event 2"],
+                ],
+            }
+        ]
+        df = pd.DataFrame(data)
+        pipeline = MockPipeline("test", bucket_name=mock_s3_bucket)
+
+        # Upload to S3
+        s3_path = pipeline.load_to_s3(df, layer="bronze", format="parquet")
+
+        # Download and read back
+        response = mock_s3_client.get_object(Bucket=mock_s3_bucket, Key=s3_path)
+        downloaded_data = response["Body"].read()
+
+        # Read with PyArrow
+        table = pq.read_table(io.BytesIO(downloaded_data))
+        downloaded_df = table.to_pandas()
+
+        # Complex types may be preserved natively OR converted to JSON strings
+        # depending on PyArrow's ability to handle them
+        chains_value = downloaded_df["chains"].iloc[0]
+        if isinstance(chains_value, list):
+            # Native PyArrow handling
+            assert chains_value == ["Ethereum", "Arbitrum", "Base"]
+        else:
+            # JSON fallback (expected for mixed/complex types)
+            assert isinstance(chains_value, str)
+            parsed = json.loads(chains_value)
+            assert parsed == ["Ethereum", "Arbitrum", "Base"]
+
+        # Verify data integrity - can be parsed back from JSON if needed
+        chain_tvls = downloaded_df["chainTvls"].iloc[0]
+        if isinstance(chain_tvls, dict):
+            # Native handling
+            assert chain_tvls["Ethereum"] == 1000000.0
+        else:
+            # JSON fallback
+            assert isinstance(chain_tvls, str)
+            parsed = json.loads(chain_tvls)
+            assert parsed["Ethereum"] == 1000000.0
+            assert parsed["Arbitrum"] == 500000.0
