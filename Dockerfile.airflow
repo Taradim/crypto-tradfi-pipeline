@@ -13,20 +13,26 @@ RUN apt-get update && apt-get install -y \
 # Switch back to airflow user
 USER airflow
 
-# Install Python dependencies
-# Note: We don't install the project in editable mode because:
+# Install Python dependencies from pyproject.toml
+# Note: We don't install the project itself because:
 # 1. The code is mounted via volumes in docker-compose.yml
 # 2. setuptools would complain about multiple top-level packages (dags, logs, src)
-# Instead, we just install the runtime dependencies
+# Instead, we extract and install only the runtime dependencies from pyproject.toml
+# This ensures a single source of truth for dependencies (no duplication)
 COPY --chown=airflow:root pyproject.toml ./
-RUN pip install --no-cache-dir apache-airflow==2.8.0 && \
-    pip install --no-cache-dir \
-    boto3>=1.42.13 \
-    pandas>=2.3.3 \
-    pyarrow>=22.0.0 \
-    python-dotenv>=1.2.1 \
-    requests>=2.32.5 \
-    structlog>=24.1.0
+# Extract dependencies from pyproject.toml using tomllib (built-in in Python 3.11+)
+# and install them. This keeps pyproject.toml as the single source of truth.
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    python3 -c " \
+    import tomllib; \
+    with open('pyproject.toml', 'rb') as f: \
+    data = tomllib.load(f); \
+    deps = data['project']['dependencies']; \
+    with open('/tmp/requirements.txt', 'w') as req_file: \
+    req_file.write('\n'.join(deps)) \
+    " && \
+    pip install --no-cache-dir -r /tmp/requirements.txt && \
+    rm /tmp/requirements.txt
 
 # Set working directory
 WORKDIR /opt/airflow
