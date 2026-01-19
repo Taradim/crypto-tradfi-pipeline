@@ -22,7 +22,8 @@ USER airflow
 # Using pip (not uv) because Airflow image has permission issues with uv --system
 COPY --chown=airflow:root pyproject.toml ./
 # Extract dependencies from pyproject.toml and install with pip
-RUN python3 -c "import tomllib; f = open('pyproject.toml', 'rb'); data = tomllib.load(f); f.close(); deps = data['project']['dependencies']; req_file = open('/tmp/requirements.txt', 'w'); req_file.write('\n'.join(deps)); req_file.close()" && \
+# Exclude apache-airflow as it's already installed in the base image
+RUN python3 -c "import tomllib; f = open('pyproject.toml', 'rb'); data = tomllib.load(f); f.close(); deps = [d for d in data['project']['dependencies'] if not d.startswith('apache-airflow')]; req_file = open('/tmp/requirements.txt', 'w'); req_file.write('\n'.join(deps)); req_file.close()" && \
     pip install --no-cache-dir -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
 
