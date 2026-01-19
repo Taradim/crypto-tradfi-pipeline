@@ -36,7 +36,7 @@ def init_s3_structure() -> None:
 
         # Define layers and sources
         layers = ["bronze", "silver", "gold"]
-        sources = ["coingecko", "dune", "defillama", "yahoo_finance", "fred"]
+        sources = ["coingecko", "defillama", "yahoo_finance"]
 
         logger.info(
             "initializing_s3_structure",

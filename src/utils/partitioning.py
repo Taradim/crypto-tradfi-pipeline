@@ -21,7 +21,7 @@ def generate_s3_path(
     Structure: {layer}/{source}/{YYYY-MM-DD}/{filename}.{ext}
 
     Args:
-        source: Data source name (e.g., 'coingecko', 'dune', 'defillama')
+        source: Data source name (e.g., 'coingecko', 'defillama', 'yahoo_finance')
         date: Date for partitioning (defaults to now if None)
         filename: Custom filename (auto-generated if None)
         format: File format ('parquet' or 'json')

@@ -37,10 +37,8 @@ class Config:
     # Pipeline Configuration
     DATA_SOURCES: list[str] = [
         "coingecko",
-        "dune",
         "defillama",
         "yahoo_finance",
-        "fred",
     ]
 
     LAYERS: list[str] = ["bronze", "silver", "gold"]
