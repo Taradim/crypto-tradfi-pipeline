@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
+from dags.utils.alerting import task_failure_callback
 from src.config import Config
 from src.monitoring import setup_logging
 from src.pipelines.coingecko import CoinGeckoPipeline
@@ -69,6 +70,7 @@ default_args = {
     "retries": 3,
     "retry_delay": timedelta(minutes=5),
     "start_date": datetime(2024, 1, 1),
+    "on_failure_callback": task_failure_callback,
 }
 
 # Create the DAG

@@ -25,3 +25,8 @@ variable "iam_user_name" {
   default     = ""
 }
 
+variable "glue_database_name" {
+  description = "Name of the Glue Data Catalog database for Iceberg tables (defaults to {bucket_name}-iceberg)"
+  type        = string
+  default     = ""
+}

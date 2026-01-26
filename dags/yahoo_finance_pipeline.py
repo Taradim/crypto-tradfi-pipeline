@@ -19,6 +19,7 @@ from airflow.operators.python import PythonOperator
 from src.config import Config
 from src.monitoring import setup_logging
 from src.pipelines.yahoo_finance import YahooFinancePipeline
+from dags.utils.alerting import task_failure_callback
 
 
 def validate_config_task() -> None:
@@ -232,6 +233,7 @@ default_args = {
     "retries": 3,
     "retry_delay": timedelta(minutes=5),
     "start_date": datetime(2024, 1, 1),
+    "on_failure_callback": task_failure_callback,
 }
 
 # Create the DAG

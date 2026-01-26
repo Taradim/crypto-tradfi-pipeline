@@ -79,10 +79,24 @@ resource "aws_iam_access_key" "exec_user_key" {
   user  = aws_iam_user.exec_user[0].name
 }
 
-# IAM Policy for S3 access (limited to this specific bucket)
+# AWS Glue Data Catalog Database for Iceberg tables
+resource "aws_glue_catalog_database" "iceberg_database" {
+  name        = var.glue_database_name != "" ? var.glue_database_name : "${var.bucket_name}-iceberg"
+  description = "Glue Data Catalog database for Iceberg tables managed by DuckDB"
+
+  location_uri = "s3://${aws_s3_bucket.data_lake.bucket}/"
+
+  tags = {
+    Name        = "Iceberg Database"
+    Environment = "production"
+    Project     = "crypto-tradfi-pipeline"
+  }
+}
+
+# IAM Policy for S3 and Glue access (for Iceberg with DuckDB)
 resource "aws_iam_user_policy" "exec_s3_access" {
   count  = var.create_iam_user ? 1 : 0
-  name   = "${var.bucket_name}-s3-access"
+  name   = "${var.bucket_name}-s3-glue-access"
   user   = aws_iam_user.exec_user[0].name
   policy = jsonencode({
     Version = "2012-10-17"
@@ -98,6 +112,28 @@ resource "aws_iam_user_policy" "exec_s3_access" {
         Resource = [
           aws_s3_bucket.data_lake.arn,
           "${aws_s3_bucket.data_lake.arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "glue:GetDatabase",
+          "glue:GetTable",
+          "glue:CreateTable",
+          "glue:UpdateTable",
+          "glue:DeleteTable",
+          "glue:GetPartition",
+          "glue:CreatePartition",
+          "glue:UpdatePartition",
+          "glue:DeletePartition",
+          "glue:GetPartitions",
+          "glue:BatchCreatePartition",
+          "glue:BatchDeletePartition"
+        ]
+        Resource = [
+          "arn:aws:glue:${var.aws_region}:*:catalog",
+          "arn:aws:glue:${var.aws_region}:*:database/${aws_glue_catalog_database.iceberg_database.name}",
+          "arn:aws:glue:${var.aws_region}:*:table/${aws_glue_catalog_database.iceberg_database.name}/*"
         ]
       }
     ]
@@ -140,3 +176,12 @@ output "iam_secret_access_key" {
   sensitive   = true
 }
 
+output "glue_database_name" {
+  description = "Name of the Glue Data Catalog database for Iceberg tables"
+  value       = aws_glue_catalog_database.iceberg_database.name
+}
+
+output "glue_database_arn" {
+  description = "ARN of the Glue Data Catalog database"
+  value       = aws_glue_catalog_database.iceberg_database.arn
+}

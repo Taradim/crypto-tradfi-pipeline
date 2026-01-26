@@ -63,6 +63,7 @@ target/
 # DotEnv configuration
 .env
 .env.airflow
+.env*
 
 # Database
 *.db

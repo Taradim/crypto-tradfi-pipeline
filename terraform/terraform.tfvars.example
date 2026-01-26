@@ -7,3 +7,6 @@ create_iam_user = true
 # Optional: customize the IAM user name (defaults to {bucket_name}-exec-user)
 # iam_user_name = "my-exec-user"
 
+# Glue Data Catalog Configuration
+# Optional: customize the Glue database name (defaults to {bucket_name}-iceberg)
+# glue_database_name = "my-iceberg-database"
