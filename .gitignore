@@ -111,6 +111,9 @@ app/google-service-account.json
 # Secrets dlt
 .dlt/
 
+# dbt profiles (contains credentials)
+dbt/profiles.yml
+
 # Logs
 logs/
 !logs/.gitkeep

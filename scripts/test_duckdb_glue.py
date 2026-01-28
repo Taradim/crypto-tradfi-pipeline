@@ -14,8 +14,8 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 import duckdb  # noqa: E402
-from dotenv import load_dotenv  # noqa: E402
 
+from src.config import Config  # noqa: E402
 from src.monitoring import get_logger, setup_logging  # noqa: E402
 
 # Setup logging
@@ -25,24 +25,15 @@ logger = get_logger("scripts.test_duckdb_glue")
 
 def main() -> None:
     """Test DuckDB connection with S3 and verify AWS credentials."""
-    # Load environment variables from .env.exec-user
-    env_file = Path(__file__).parent.parent / "terraform" / ".env.exec-user"
-    if env_file.exists():
-        load_dotenv(env_file)
-        logger.info("env_file_loaded", env_file=str(env_file))
-    else:
-        logger.warning(
-            "env_file_not_found",
-            env_file=str(env_file),
-            message="Using system environment variables",
-        )
+    # Validate config (loads .env.airflow and .env via src/config.py)
+    Config.validate()
 
-    # Retrieve credentials from environment variables
+    # Retrieve credentials from centralized config and environment
     access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
     secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-    database_name = os.getenv("GLUE_DATABASE_NAME", "coding-projects-taradim-2026-iceberg")
-    aws_region = os.getenv("AWS_DEFAULT_REGION", "eu-west-1")
-    bucket_name = "coding-projects-taradim-2026"
+    database_name = os.getenv("GLUE_DATABASE_NAME", f"{Config.S3_BUCKET_NAME}-iceberg")
+    aws_region = Config.AWS_REGION
+    bucket_name = Config.S3_BUCKET_NAME
 
     # Verify credentials are present
     if not access_key_id or not secret_access_key:
@@ -51,7 +42,7 @@ def main() -> None:
             message="AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be defined",
         )
         raise ValueError(
-            "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be defined in .env.exec-user"
+            "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be defined in .env.airflow or .env"
         )
 
     logger.info(

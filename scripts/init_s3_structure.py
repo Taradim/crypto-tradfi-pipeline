@@ -7,22 +7,24 @@ empty marker files to make the structure visible in the AWS Console.
 
 from __future__ import annotations
 
-import os
+import sys
+from pathlib import Path
 
 import boto3
-from dotenv import load_dotenv
 
-from src.monitoring import bind_context, get_logger
+# Add project root to path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.config import Config  # noqa: E402
+from src.monitoring import bind_context, get_logger  # noqa: E402
 
 
 def init_s3_structure() -> None:
     """Initialize S3 bucket structure with Bronze/Silver/Gold layers."""
-    load_dotenv()
-
-    # Get configuration from environment
-    bucket_name = os.getenv("S3_BUCKET_NAME")
-    if not bucket_name:
-        raise ValueError("S3_BUCKET_NAME environment variable not set")
+    # Validate config (loads .env.airflow and .env via src/config.py)
+    Config.validate()
+    bucket_name = Config.S3_BUCKET_NAME
 
     # Initialize logger with context
     logger = get_logger()
@@ -32,11 +34,11 @@ def init_s3_structure() -> None:
         operation="s3_structure_initialization",
     ):
         # Initialize S3 client
-        s3_client = boto3.client("s3", region_name=os.getenv("AWS_DEFAULT_REGION", "eu-west-1"))
+        s3_client = boto3.client("s3", region_name=Config.AWS_REGION)
 
-        # Define layers and sources
-        layers = ["bronze", "silver", "gold"]
-        sources = ["coingecko", "defillama", "yahoo_finance"]
+        # Use layers and sources from centralized config
+        layers = Config.LAYERS
+        sources = Config.DATA_SOURCES
 
         logger.info(
             "initializing_s3_structure",
