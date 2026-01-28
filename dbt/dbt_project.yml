@@ -33,13 +33,14 @@ vars:
 # Aligned with Bronze/Silver/Gold architecture
 # Note: Bronze data is written by Python pipelines, dbt starts at Silver layer
 # External materialization writes Parquet files directly to S3
+# Files are written to: {external_root}/{schema}/{model_name}.parquet
 models:
   data_pipeline_portfolio:
     silver:
       +materialized: external
-      +location: "silver/{{ model.name }}.parquet"
+      +schema: silver
       description: "Silver layer models - read from S3 bronze, clean and standardize, write to S3 silver"
     gold:
       +materialized: external
-      +location: "gold/{{ model.name }}.parquet"
+      +schema: gold
       description: "Gold layer models - business-ready analytical data, written to S3 gold"
