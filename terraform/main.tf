@@ -12,6 +12,9 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Current AWS account ID (required for Glue resource ARNs)
+data "aws_caller_identity" "current" {}
+
 # Main S3 bucket for the data lake
 resource "aws_s3_bucket" "data_lake" {
   bucket = var.bucket_name
@@ -79,15 +82,15 @@ resource "aws_iam_access_key" "exec_user_key" {
   user  = aws_iam_user.exec_user[0].name
 }
 
-# AWS Glue Data Catalog Database for Iceberg tables
+# AWS Glue Data Catalog Database (used by dbt-duckdb glue_register and Iceberg)
 resource "aws_glue_catalog_database" "iceberg_database" {
-  name        = var.glue_database_name != "" ? var.glue_database_name : "${var.bucket_name}-iceberg"
-  description = "Glue Data Catalog database for Iceberg tables managed by DuckDB"
+  name        = var.glue_database_name != "" ? var.glue_database_name : "data_pipeline_portfolio"
+  description = "Glue Data Catalog database for dbt external tables and Iceberg"
 
   location_uri = "s3://${aws_s3_bucket.data_lake.bucket}/"
 
   tags = {
-    Name        = "Iceberg Database"
+    Name        = "Data Pipeline Portfolio"
     Environment = "production"
     Project     = "crypto-tradfi-pipeline"
   }
@@ -118,6 +121,7 @@ resource "aws_iam_user_policy" "exec_s3_access" {
         Effect = "Allow"
         Action = [
           "glue:GetDatabase",
+          "glue:CreateDatabase",
           "glue:GetTable",
           "glue:CreateTable",
           "glue:UpdateTable",
@@ -131,9 +135,9 @@ resource "aws_iam_user_policy" "exec_s3_access" {
           "glue:BatchDeletePartition"
         ]
         Resource = [
-          "arn:aws:glue:${var.aws_region}:*:catalog",
-          "arn:aws:glue:${var.aws_region}:*:database/${aws_glue_catalog_database.iceberg_database.name}",
-          "arn:aws:glue:${var.aws_region}:*:table/${aws_glue_catalog_database.iceberg_database.name}/*"
+          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:catalog",
+          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:database/${aws_glue_catalog_database.iceberg_database.name}",
+          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${aws_glue_catalog_database.iceberg_database.name}/*"
         ]
       }
     ]

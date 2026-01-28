@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetDatabase",
+        "glue:CreateDatabase",
+        "glue:GetTable",
+        "glue:CreateTable",
+        "glue:UpdateTable",
+        "glue:DeleteTable",
+        "glue:GetPartition",
+        "glue:CreatePartition",
+        "glue:UpdatePartition",
+        "glue:DeletePartition",
+        "glue:GetPartitions",
+        "glue:BatchCreatePartition",
+        "glue:BatchDeletePartition"
+      ],
+      "Resource": [
+        "arn:aws:glue:eu-west-1:ACCOUNT_ID:catalog",
+        "arn:aws:glue:eu-west-1:ACCOUNT_ID:database/data_pipeline_portfolio",
+        "arn:aws:glue:eu-west-1:ACCOUNT_ID:table/data_pipeline_portfolio/*"
+      ]
+    }
+  ]
+}

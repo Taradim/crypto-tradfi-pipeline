@@ -26,7 +26,7 @@ variable "iam_user_name" {
 }
 
 variable "glue_database_name" {
-  description = "Name of the Glue Data Catalog database for Iceberg tables (defaults to {bucket_name}-iceberg)"
+  description = "Name of the Glue Data Catalog database (must match dbt glue_database config; default: data_pipeline_portfolio)"
   type        = string
-  default     = ""
+  default     = "data_pipeline_portfolio"
 }

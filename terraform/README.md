@@ -43,7 +43,8 @@ terraform apply
 - S3 bucket with versioning enabled
 - Server-side encryption (AES256)
 - Public access blocked (security best practice)
-- **IAM User** (optional, enabled by default) with limited S3 permissions for your host/server running Airflow DAGs
+- **Glue Data Catalog database** (default name: `data_pipeline_portfolio`) for dbt external tables and Athena
+- **IAM User** (optional, enabled by default) with S3 + Glue permissions for Airflow/dbt
 - **IAM Access Keys** for the user (outputs are marked as sensitive)
 
 ## IAM User for Host/Server
@@ -59,6 +60,24 @@ Add these to your `.env.airflow` file:
 AWS_ACCESS_KEY_ID=<from terraform output>
 AWS_SECRET_ACCESS_KEY=<from terraform output>
 ```
+
+**If your IAM user (e.g. `data-pipeline-user`) already exists and was not created by this Terraform**, attach Glue permissions manually:
+
+1. Edit `terraform/glue-policy-for-existing-user.json`: replace `ACCOUNT_ID` with your AWS account ID (e.g. `315435443947`).
+2. Create the policy in IAM: AWS Console → IAM → Policies → Create policy → JSON → paste the content → Name it e.g. `DataPipelineGlueAccess`.
+3. Attach the policy to your user: IAM → Users → data-pipeline-user → Add permissions → Attach policies → select `DataPipelineGlueAccess`.
+
+Or via AWS CLI (replace ACCOUNT_ID and REGION):
+```bash
+aws iam put-user-policy --user-name data-pipeline-user --policy-name GlueCatalogAccess --policy-document file://terraform/glue-policy-for-existing-user.json
+```
+(Note: put-user-policy uses inline policy; for the JSON you must replace ACCOUNT_ID in the file first.)
+
+To use an existing IAM user name with Terraform (so Terraform manages the policy), set in `terraform.tfvars`:
+```hcl
+iam_user_name = "data-pipeline-user"
+```
+Then run `terraform import aws_iam_user.exec_user[0] data-pipeline-user` before `terraform apply`.
 
 To disable IAM user creation, set in `terraform.tfvars`:
 ```hcl
