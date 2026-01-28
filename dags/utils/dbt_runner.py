@@ -32,7 +32,11 @@ class DbtRunnerError(Exception):
         self.command = command
         self.return_code = return_code
         self.output = output
-        super().__init__(f"dbt command failed: {command} (exit code {return_code})")
+        # Include output in exception message for Airflow logs visibility
+        super().__init__(
+            f"dbt command failed: {command} (exit code {return_code})\n"
+            f"--- dbt output ---\n{output}\n--- end output ---"
+        )
 
 
 def setup_dbt_environment() -> dict[str, str]:
@@ -129,11 +133,20 @@ def run_dbt_command(
     output = result.stdout + result.stderr
 
     if result.returncode != 0:
+        # Log the full output for debugging before raising
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error("dbt command failed. Full output:\n%s", output)
         raise DbtRunnerError(
             command=" ".join(cmd),
             return_code=result.returncode,
             output=output,
         )
+
+    # Log success output for visibility
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info("dbt command succeeded:\n%s", output)
 
     return output
 

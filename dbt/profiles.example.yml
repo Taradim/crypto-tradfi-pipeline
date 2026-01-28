@@ -1,4 +1,4 @@
-# dbt profiles configuration for DuckDB
+# dbt profiles configuration for DuckDB with S3 external storage
 # Copy this file to profiles.yml and update with your actual AWS credentials
 # cp dbt/profiles.example.yml dbt/profiles.yml
 
@@ -7,8 +7,7 @@ data_pipeline_portfolio:
   outputs:
     dev:
       type: duckdb
-      path: ":memory:" # In-memory database for development
-      # For persistent database, use: path: 'data_pipeline.duckdb'
+      path: "data_pipeline.duckdb" # Persistent database (required for multi-step dbt runs)
 
       # Extensions needed for S3 access
       extensions:
@@ -22,6 +21,5 @@ data_pipeline_portfolio:
         s3_access_key_id: "{{ env_var('AWS_ACCESS_KEY_ID') }}"
         s3_secret_access_key: "{{ env_var('AWS_SECRET_ACCESS_KEY') }}"
 
-      # Optional: Configure S3 endpoint (for LocalStack or custom S3)
-      # settings:
-      #   s3_endpoint: 'http://localhost:4566'  # Uncomment for LocalStack
+      # External materialization: write Parquet files to S3
+      external_root: "s3://{{ env_var('S3_BUCKET_NAME') }}"

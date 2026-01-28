@@ -32,13 +32,14 @@ vars:
 # Full documentation: https://docs.getdbt.com/reference/model-configs
 # Aligned with Bronze/Silver/Gold architecture
 # Note: Bronze data is written by Python pipelines, dbt starts at Silver layer
+# External materialization writes Parquet files directly to S3
 models:
   data_pipeline_portfolio:
     silver:
-      +materialized: view
-      +schema: silver
-      description: "Silver layer models - read from S3 bronze, clean and standardize data"
+      +materialized: external
+      +location: "silver/{{ model.name }}.parquet"
+      description: "Silver layer models - read from S3 bronze, clean and standardize, write to S3 silver"
     gold:
-      +materialized: table
-      +schema: gold
-      description: "Gold layer models - business-ready analytical data for BI and dashboards"
+      +materialized: external
+      +location: "gold/{{ model.name }}.parquet"
+      description: "Gold layer models - business-ready analytical data, written to S3 gold"

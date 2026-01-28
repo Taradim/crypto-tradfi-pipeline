@@ -67,6 +67,7 @@ target/
 
 # Database
 *.db
+*.duckdb
 *.rdb
 
 # Pycharm
@@ -113,6 +114,11 @@ app/google-service-account.json
 
 # dbt profiles (contains credentials)
 dbt/profiles.yml
+
+# dbt artifacts
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
 
 # Logs
 logs/
