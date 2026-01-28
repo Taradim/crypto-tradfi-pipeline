@@ -4,7 +4,7 @@
 
 {{ config(
     materialized='external',
-    location='gold/crypto_prices.parquet',
+    location='s3://' ~ var('s3_bucket_name') ~ '/gold/crypto_prices.parquet',
     glue_register=true,
     glue_database='data_pipeline_portfolio'
 ) }}
