@@ -2,6 +2,13 @@
 -- This model reads raw data from S3 bronze layer and standardizes column names and types
 -- Silver layer: Cleaned and validated data (Bronze data is already written by Python pipelines)
 
+{{ config(
+    materialized='external',
+    location='silver/coingecko.parquet',
+    glue_register=true,
+    glue_database='data_pipeline_portfolio'
+) }}
+
 with source as (
     select * from read_parquet('s3://{{ var("s3_bucket_name") }}/bronze/coingecko/**/*.parquet')
     where id is not null

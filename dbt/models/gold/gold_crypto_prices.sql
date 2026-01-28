@@ -2,6 +2,13 @@
 -- This model aggregates and enriches CoinGecko data for analytics
 -- Gold layer: Business-ready analytical data
 
+{{ config(
+    materialized='external',
+    location='gold/crypto_prices.parquet',
+    glue_register=true,
+    glue_database='data_pipeline_portfolio'
+) }}
+
 with silver as (
     select * from {{ ref('silver_coingecko') }}
 ),

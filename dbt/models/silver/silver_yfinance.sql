@@ -2,6 +2,13 @@
 -- Reads raw data from S3 bronze layer and standardizes column names and types
 -- Bronze data is written by the Yahoo Finance Airflow pipeline (yfinance)
 
+{{ config(
+    materialized='external',
+    location='silver/yfinance.parquet',
+    glue_register=true,
+    glue_database='data_pipeline_portfolio'
+) }}
+
 with source as (
     select * from read_parquet('s3://{{ var("s3_bucket_name") }}/bronze/yahoo_finance/**/*.parquet')
     where "Symbol" is not null

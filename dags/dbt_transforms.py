@@ -1,7 +1,10 @@
-"""Airflow DAG for dbt transformations (Bronze -> Silver -> Gold) + Glue sync.
+"""Airflow DAG for dbt transformations (Bronze -> Silver -> Gold).
 
 This DAG orchestrates dbt transformations to convert raw Bronze layer data
-into cleaned Silver and business-ready Gold layers, then syncs to Glue Catalog.
+into cleaned Silver and business-ready Gold layers.
+
+Glue Catalog registration is handled automatically by dbt-duckdb via the
+glue_register=true config option in each model.
 
 The DAG can be triggered:
 - On schedule (after typical ingestion times)
@@ -13,8 +16,6 @@ Configuration options (via dag_run.conf):
 - select: str - dbt selector expression for specific models
 - test_select: str - dbt selector for specific tests
 - skip_tests: bool - Skip dbt test step (not recommended)
-- skip_glue_sync: bool - Skip Glue Catalog sync step
-- glue_database: str - Glue database name (default: data_pipeline_portfolio)
 """
 
 from __future__ import annotations
@@ -37,7 +38,6 @@ from dags.utils.dbt_runner import (
     run_dbt_tests,
     setup_dbt_environment,
 )
-from scripts.glue.sync_glue_catalog import sync_glue_catalog
 from src.config import Config
 
 if TYPE_CHECKING:
@@ -61,6 +61,7 @@ def run_silver_task(**context: Any) -> str:
     """Execute dbt transformations for Silver layer.
 
     Transforms Bronze (raw) data into cleaned Silver layer.
+    Also registers tables in AWS Glue Catalog via glue_register=true.
 
     Args:
         **context: Airflow task context.
@@ -75,6 +76,7 @@ def run_gold_task(**context: Any) -> str:
     """Execute dbt transformations for Gold layer.
 
     Transforms Silver data into business-ready Gold layer.
+    Also registers tables in AWS Glue Catalog via glue_register=true.
 
     Args:
         **context: Airflow task context.
@@ -103,35 +105,6 @@ def run_tests_task(**context: Any) -> str:
     return run_dbt_tests(**context)
 
 
-def sync_glue_task(**context: Any) -> str:
-    """Synchronize dbt models to AWS Glue Catalog.
-
-    Registers Silver and Gold Parquet tables in Glue for Athena querying.
-
-    Args:
-        **context: Airflow task context.
-
-    Returns:
-        str: Sync summary.
-    """
-    # Check if sync should be skipped
-    dag_run: DagRun | None = context.get("dag_run")
-    skip_sync = False
-    database = "data_pipeline_portfolio"
-
-    if dag_run and dag_run.conf:
-        skip_sync = dag_run.conf.get("skip_glue_sync", False)
-        database = dag_run.conf.get("glue_database", database)
-
-    if skip_sync:
-        return "Glue sync skipped via dag_run.conf.skip_glue_sync=True"
-
-    results = sync_glue_catalog(database=database, dry_run=False)
-
-    total = sum(results.values())
-    return f"Synced {total} tables to Glue Catalog ({results})"
-
-
 # Default arguments for the DAG
 default_args = {
     "owner": "data-engineering",
@@ -150,7 +123,7 @@ default_args = {
 dag = DAG(
     "dbt_transforms",
     default_args=default_args,
-    description="Orchestrates dbt transformations: Bronze -> Silver -> Gold",
+    description="Orchestrates dbt transformations: Bronze -> Silver -> Gold (with auto Glue sync)",
     schedule="30 0,6,12,18 * * *",  # 00:30, 06:30, 12:30, 18:30 UTC
     catchup=False,
     tags=["dbt", "transformations", "silver", "gold", "data-quality", "glue"],
@@ -164,14 +137,14 @@ validate_config = PythonOperator(
     dag=dag,
 )
 
-# Task 2: Run Silver layer transformations
+# Task 2: Run Silver layer transformations (writes to S3 + registers in Glue)
 run_silver = PythonOperator(
     task_id="dbt_run_silver",
     python_callable=run_silver_task,
     dag=dag,
 )
 
-# Task 3: Run Gold layer transformations
+# Task 3: Run Gold layer transformations (writes to S3 + registers in Glue)
 run_gold = PythonOperator(
     task_id="dbt_run_gold",
     python_callable=run_gold_task,
@@ -185,16 +158,9 @@ run_tests = PythonOperator(
     dag=dag,
 )
 
-# Task 5: Sync to AWS Glue Catalog
-sync_glue = PythonOperator(
-    task_id="sync_glue_catalog",
-    python_callable=sync_glue_task,
-    dag=dag,
-)
-
 # Define task dependencies
 # Silver depends on Bronze (handled by ingestion DAGs)
 # Gold depends on Silver
 # Tests run after all transformations
-# Glue sync runs after successful tests
-validate_config >> run_silver >> run_gold >> run_tests >> sync_glue
+# Note: Glue registration is automatic via dbt-duckdb glue_register=true
+validate_config >> run_silver >> run_gold >> run_tests
