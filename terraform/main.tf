@@ -96,6 +96,30 @@ resource "aws_glue_catalog_database" "iceberg_database" {
   }
 }
 
+resource "aws_glue_catalog_database" "silver" {
+  name        = "silver"
+  description = "Glue database for silver layer tables"
+  location_uri = "s3://${aws_s3_bucket.data_lake.bucket}/silver/"
+
+  tags = {
+    Name        = "Silver Layer Tables"
+    Environment = "production"
+    Project     = "crypto-tradfi-pipeline"
+  }
+}
+
+resource "aws_glue_catalog_database" "gold" {
+  name        = "gold"
+  description = "Glue database for gold layer tables"
+  location_uri = "s3://${aws_s3_bucket.data_lake.bucket}/gold/"
+
+  tags = {
+    Name        = "Gold Layer Tables"
+    Environment = "production"
+    Project     = "crypto-tradfi-pipeline"
+  }
+}
+
 # IAM Policy for S3 and Glue access (for DuckDB)
 resource "aws_iam_user_policy" "exec_s3_access" {
   count  = var.create_iam_user ? 1 : 0
@@ -139,7 +163,11 @@ resource "aws_iam_user_policy" "exec_s3_access" {
         Resource = [
           "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:catalog",
           "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:database/${aws_glue_catalog_database.iceberg_database.name}",
-          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${aws_glue_catalog_database.iceberg_database.name}/*"
+          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${aws_glue_catalog_database.iceberg_database.name}/*",
+          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:database/${aws_glue_catalog_database.silver.name}",
+          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:database/${aws_glue_catalog_database.gold.name}",
+          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${aws_glue_catalog_database.silver.name}/*",
+          "arn:aws:glue:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${aws_glue_catalog_database.gold.name}/*",
         ]
       }
     ]

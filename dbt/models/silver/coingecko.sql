@@ -2,7 +2,9 @@
 -- Reads raw data from S3 bronze layer; standardizes column names and types
 -- Bronze written by Python pipelines; Silver/Gold materialized external + Glue (Step 4.5)
 
-{{ config(location=get_external_location(this)) }}
+{{ config(
+    location=get_external_location(this)
+    ) }}
 
 with source as (
     select * from read_parquet('s3://{{ var("s3_bucket_name") }}/bronze/coingecko/**/*.parquet')
