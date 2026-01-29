@@ -1,13 +1,8 @@
--- Silver model for DeFiLlama protocol data
--- Reads raw data from S3 bronze layer and standardizes column names and types
--- Bronze data is written by the DeFiLlama Airflow pipeline (protocols endpoint)
+-- Silver model: DeFiLlama protocol data (Plan V1 - Step 3 dbt)
+-- Reads raw data from S3 bronze; standardizes columns and types
+-- Bronze written by DeFiLlama Airflow pipeline (protocols endpoint)
 
-{{ config(
-    materialized='external',
-    location='s3://' ~ var('s3_bucket_name') ~ '/silver/defillama.parquet',
-    glue_register=true,
-    glue_database='data_pipeline_portfolio'
-) }}
+{{ config(location=get_external_location(this)) }}
 
 with source as (
     select * from read_parquet('s3://{{ var("s3_bucket_name") }}/bronze/defillama/**/*.parquet')

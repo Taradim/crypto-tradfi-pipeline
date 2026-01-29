@@ -1,7 +1,5 @@
--- Macro to calculate ratio
--- Safely handles division by zero and null values
--- Returns ratio or NULL
--- Multiply by 100 in SQL if you need percentage
+-- Macro: safe ratio (numerator/denominator); returns NULL on zero or null
+-- Use * 100 in SQL for percentage
 
 {% macro calculate_ratio(numerator, denominator) %}
     CASE

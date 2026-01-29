@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: silver_coingecko
+  - name: coingecko
     description: "Silver model for CoinGecko cryptocurrency market data. Reads raw data from S3 bronze layer and standardizes column names and types."
     columns:
       - name: coin_id
@@ -36,7 +36,7 @@ models:
         tests:
           - not_null
 
-  - name: silver_defillama
+  - name: defillama
     description: "Silver model for DeFiLlama protocol data. Reads raw data from S3 bronze layer and standardizes column names and types (TVL, changes, metadata)."
     columns:
       - name: protocol_id
@@ -64,7 +64,7 @@ models:
         tests:
           - not_null
 
-  - name: silver_yfinance
+  - name: yfinance
     description: "Silver model for Yahoo Finance stock market data. Reads raw data from S3 bronze layer and standardizes OHLCV column names and types."
     columns:
       - name: symbol
@@ -92,7 +92,7 @@ models:
         tests:
           - not_null
 
-  - name: gold_crypto_prices
+  - name: crypto_prices
     description: "Gold model for cryptocurrency prices with enriched metrics and aggregations. Business-ready analytical data for BI and dashboards."
     columns:
       - name: coin_id

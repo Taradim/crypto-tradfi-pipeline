@@ -82,10 +82,10 @@ resource "aws_iam_access_key" "exec_user_key" {
   user  = aws_iam_user.exec_user[0].name
 }
 
-# AWS Glue Data Catalog Database (used by dbt-duckdb glue_register and Iceberg)
+# AWS Glue Data Catalog Database (Plan V1 - Step 4.5; dbt glue_register + optional Iceberg)
 resource "aws_glue_catalog_database" "iceberg_database" {
   name        = var.glue_database_name != "" ? var.glue_database_name : "data_pipeline_portfolio"
-  description = "Glue Data Catalog database for dbt external tables and Iceberg"
+  description = "Glue Data Catalog database for dbt external tables (silver/gold)"
 
   location_uri = "s3://${aws_s3_bucket.data_lake.bucket}/"
 
@@ -96,7 +96,7 @@ resource "aws_glue_catalog_database" "iceberg_database" {
   }
 }
 
-# IAM Policy for S3 and Glue access (for Iceberg with DuckDB)
+# IAM Policy for S3 and Glue access (for DuckDB)
 resource "aws_iam_user_policy" "exec_s3_access" {
   count  = var.create_iam_user ? 1 : 0
   name   = "${var.bucket_name}-s3-glue-access"
@@ -121,8 +121,10 @@ resource "aws_iam_user_policy" "exec_s3_access" {
         Effect = "Allow"
         Action = [
           "glue:GetDatabase",
+          "glue:GetDatabases",
           "glue:CreateDatabase",
           "glue:GetTable",
+          "glue:GetTables",
           "glue:CreateTable",
           "glue:UpdateTable",
           "glue:DeleteTable",

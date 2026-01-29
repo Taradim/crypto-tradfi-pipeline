@@ -332,6 +332,26 @@ wheels = [
 ]
 
 [[package]]
+name = "awswrangler"
+version = "3.15.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "boto3" },
+    { name = "botocore" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "packaging" },
+    { name = "pandas" },
+    { name = "pyarrow" },
+    { name = "setuptools", marker = "python_full_version >= '3.12'" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/31/39/8ae870b63e83d5375b6b54b974ec7fb83d5edb6acc5ccdd7fac36a4c9906/awswrangler-3.15.0.tar.gz", hash = "sha256:690793b6ff8407c45f8702f1c4028f2cd45017193063cdb358455e611d8e759d", size = 259896, upload-time = "2026-01-13T23:01:27.82Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bd/76/37d0d9905e1ac8e1a76d61f4ba21ac89adee1984657c0c6b053478adaaf1/awswrangler-3.15.0-py3-none-any.whl", hash = "sha256:c070ec15238da1607f1c4fc8fd2900c6f663ca849594c3da4131c09f1eead7e8", size = 373988, upload-time = "2026-01-13T22:59:18.404Z" },
+]
+
+[[package]]
 name = "babel"
 version = "2.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3947,6 +3967,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "apache-airflow" },
+    { name = "awswrangler" },
     { name = "boto3" },
     { name = "boto3-stubs", extra = ["glue"] },
     { name = "dbt-duckdb" },
@@ -3978,6 +3999,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "apache-airflow", specifier = ">=2.8.0" },
+    { name = "awswrangler", specifier = ">=3.15.0" },
     { name = "boto3", specifier = ">=1.42.13" },
     { name = "boto3-stubs", extras = ["glue"], specifier = ">=1.42.0" },
     { name = "dbt-duckdb", specifier = ">=1.10.0" },

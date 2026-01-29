@@ -81,7 +81,7 @@ def run_dbt_command(
 
     Args:
         command: dbt command to run (run, test, build, compile, etc.)
-        select: dbt selector expression (e.g., "silver.*" or "+gold_crypto_prices")
+        select: dbt selector expression (e.g., "silver.*" or "+crypto_prices")
         exclude: dbt exclude expression
         full_refresh: If True, run with --full-refresh flag
         target: dbt target profile to use (default: dev)

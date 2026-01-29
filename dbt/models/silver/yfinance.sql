@@ -1,13 +1,8 @@
--- Silver model for Yahoo Finance stock market data
--- Reads raw data from S3 bronze layer and standardizes column names and types
--- Bronze data is written by the Yahoo Finance Airflow pipeline (yfinance)
+-- Silver model: Yahoo Finance stock data (Plan V1 - Step 3 dbt)
+-- Reads raw data from S3 bronze; standardizes OHLCV column names and types
+-- Bronze written by Yahoo Finance Airflow pipeline (yfinance)
 
-{{ config(
-    materialized='external',
-    location='s3://' ~ var('s3_bucket_name') ~ '/silver/yfinance.parquet',
-    glue_register=true,
-    glue_database='data_pipeline_portfolio'
-) }}
+{{ config(location=get_external_location(this)) }}
 
 with source as (
     select * from read_parquet('s3://{{ var("s3_bucket_name") }}/bronze/yahoo_finance/**/*.parquet')

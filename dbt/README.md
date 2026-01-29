@@ -8,11 +8,14 @@ This dbt project standardizes transformations for the data pipeline portfolio us
 dbt/
 ├── models/
 │   ├── silver/           # Silver layer models (read from S3 bronze)
-│   │   └── silver_coingecko.sql
+│   │   ├── coingecko.sql
+│   │   ├── defillama.sql
+│   │   └── yfinance.sql
 │   └── gold/             # Gold layer models (business-ready analytics)
-│       └── gold_crypto_prices.sql
+│       └── crypto_prices.sql
 ├── macros/               # Reusable SQL macros
-│   └── configure_s3.sql
+│   ├── configure_s3.sql
+│   └── get_external_location.sql
 ├── tests/                # Custom tests
 ├── dbt_project.yml       # dbt project configuration
 ├── schema.yml            # Model documentation and tests
@@ -80,8 +83,8 @@ dbt debug
 dbt run
 
 # Run specific model
-dbt run --select silver_coingecko
-dbt run --select gold_crypto_prices
+dbt run --select coingecko
+dbt run --select crypto_prices
 
 # Run silver models only
 dbt run --select silver.*
@@ -97,7 +100,7 @@ dbt run --select gold.*
 dbt test
 
 # Run tests for specific model
-dbt test --select silver_coingecko
+dbt test --select coingecko
 ```
 
 ### Generate documentation
@@ -112,15 +115,13 @@ dbt docs serve
 
 ### Silver Layer Models (`silver/`)
 
-- **silver_coingecko**: Reads raw data from S3 bronze layer and standardizes
-  - Renames columns to snake_case
-  - Standardizes data types
-  - Adds ingestion metadata
-  - Applies basic data quality checks
+- **coingecko**: Reads raw data from S3 bronze layer and standardizes CoinGecko data
+- **defillama**: DeFiLlama protocol TVL and metadata
+- **yfinance**: Yahoo Finance OHLCV stock data
 
 ### Gold Layer Models (`gold/`)
 
-- **gold_crypto_prices**: Enriched cryptocurrency prices with derived metrics
+- **crypto_prices**: Enriched cryptocurrency prices with derived metrics
   - Calculates volume-to-market-cap ratio
   - Categorizes trends (uptrend, downtrend, etc.)
   - Categorizes market cap (large, mid, small, micro)

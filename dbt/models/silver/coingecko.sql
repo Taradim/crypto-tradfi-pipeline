@@ -1,13 +1,8 @@
--- Silver model for CoinGecko cryptocurrency market data
--- This model reads raw data from S3 bronze layer and standardizes column names and types
--- Silver layer: Cleaned and validated data (Bronze data is already written by Python pipelines)
+-- Silver model: CoinGecko cryptocurrency market data (Plan V1 - Step 3 dbt)
+-- Reads raw data from S3 bronze layer; standardizes column names and types
+-- Bronze written by Python pipelines; Silver/Gold materialized external + Glue (Step 4.5)
 
-{{ config(
-    materialized='external',
-    location='s3://' ~ var('s3_bucket_name') ~ '/silver/coingecko.parquet',
-    glue_register=true,
-    glue_database='data_pipeline_portfolio'
-) }}
+{{ config(location=get_external_location(this)) }}
 
 with source as (
     select * from read_parquet('s3://{{ var("s3_bucket_name") }}/bronze/coingecko/**/*.parquet')

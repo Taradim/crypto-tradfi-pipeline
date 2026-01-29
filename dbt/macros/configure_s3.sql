@@ -1,6 +1,5 @@
--- Macro to configure DuckDB S3 access
--- This macro sets up S3 credentials from environment variables
--- It should be called in on-run-start hook
+-- Macro: DuckDB S3 access (technical-directives: DuckDB local/edge)
+-- Sets S3 credentials from env vars; call from on-run-start hook in dbt_project.yml
 
 {% macro configure_s3() %}
     {% set aws_access_key_id = env_var('AWS_ACCESS_KEY_ID') %}

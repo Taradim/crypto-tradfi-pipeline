@@ -1,16 +1,11 @@
--- Gold model for cryptocurrency prices
--- This model aggregates and enriches CoinGecko data for analytics
--- Gold layer: Business-ready analytical data
+-- Gold model: cryptocurrency prices (Plan V1 - Step 3 dbt)
+-- Aggregates and enriches CoinGecko Silver data for analytics
+-- Gold layer: business-ready analytical data; refs coingecko Silver model
 
-{{ config(
-    materialized='external',
-    location='s3://' ~ var('s3_bucket_name') ~ '/gold/crypto_prices.parquet',
-    glue_register=true,
-    glue_database='data_pipeline_portfolio'
-) }}
+{{ config(location=get_external_location(this)) }}
 
 with silver as (
-    select * from {{ ref('silver_coingecko') }}
+    select * from {{ ref('coingecko') }}
 ),
 
 enriched as (

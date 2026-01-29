@@ -1,8 +1,6 @@
-name: "data_pipeline_portfolio"
+name: "data_pipeline"
 version: "1.0.0"
 config-version: 2
-
-# This setting configures which "profile" dbt uses for this project.
 profile: "data_pipeline_portfolio"
 
 # These configurations specify where dbt should look for different types of files.
@@ -24,19 +22,25 @@ clean-targets:
 # on-run-start:
 #   - "{{ configure_s3() }}"
 
-# Variables (no default - dbt will fail if S3_BUCKET_NAME is not set)
+# Variables: S3_BUCKET_NAME required for dbt run; default empty for parse/test without env
 vars:
-  s3_bucket_name: "{{ env_var('S3_BUCKET_NAME') }}"
+  s3_bucket_name: "{{ env_var('S3_BUCKET_NAME', '') }}"
 
-# Configuring models
+# Configuring models (Plan V1 - Step 3 dbt, Step 4.5 Glue Catalog)
 # Full documentation: https://docs.getdbt.com/reference/model-configs
-# Aligned with Bronze/Silver/Gold architecture
-# Note: Bronze data is written by Python pipelines, dbt starts at Silver layer
-# External materialization writes Parquet files directly to S3
-# Location is configured in each model file using config(location='...')
+# Bronze/Silver/Gold architecture; schema = Glue database (silver.coingecko, gold.crypto_prices)
+# Location = one folder per table (s3://bucket/silver/coingecko/) to avoid schema convergence
 models:
-  data_pipeline_portfolio:
+  data_pipeline:
     silver:
-      description: "Silver layer models - read from S3 bronze, clean and standardize, write to S3 silver"
+      description: "Silver layer - read from S3 bronze, write to S3 silver/<table>/"
+      +materialized: external
+      +glue_register: true
+      +glue_database: silver
+      # +location: set per model via macro get_external_location(this)
     gold:
-      description: "Gold layer models - business-ready analytical data, written to S3 gold"
+      description: "Gold layer - business-ready analytical data"
+      +materialized: external
+      +glue_register: true
+      +glue_database: gold
+      # +location: set per model via macro get_external_location(this)
