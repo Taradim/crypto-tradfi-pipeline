@@ -157,4 +157,4 @@ Tests are defined in `schema.yml`:
 
 1. Add more silver models (yahoo_finance, defillama, etc.)
 2. Create additional gold models for different analytics use cases
-3. Integrate with Airflow for scheduled runs (see Étape 4)
+3. Integrate with Airflow for scheduled runs (see main [README](../README.md))
