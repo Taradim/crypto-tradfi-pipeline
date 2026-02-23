@@ -4,7 +4,7 @@ This script sends a test alert to Discord to verify the webhook configuration.
 """
 
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Add project root to path
@@ -27,7 +27,7 @@ def main() -> None:
     dag_id = "test_dag"
     task_id = "test_task"
     run_id = "test_run_123"
-    execution_date = datetime.now(timezone.utc).isoformat()
+    execution_date = datetime.now(UTC).isoformat()
     log_url = "http://localhost:8080/log?dag_id=test_dag&task_id=test_task&execution_date=2026-01-26T10:00:00Z"
     error_message = "This is a test error message to verify Discord alerting is working correctly."
 

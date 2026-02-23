@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal
 
 FileFormat = Literal["parquet", "json"]
@@ -35,7 +35,7 @@ def generate_s3_path(
         'bronze/coingecko/2025-01-17/markets.parquet'
     """
     if date is None:
-        date = datetime.utcnow()
+        date = datetime.now(UTC)
 
     date_str = date.strftime("%Y-%m-%d")
 
